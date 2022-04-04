@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutterfire_query/user.dart';
+import 'package:flutterfire_query/character.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,18 +32,42 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<User> users = [];
+  final _store = FirebaseFirestore.instance;
+
+  // 取得したキャラクター群
+  List<Character> characters = [];
 
   @override
   void initState() {
     super.initState();
   }
 
+  /// すべてのキャラクターを取得する
   Future<void> fetchAllUser() async {
-    final _store = FirebaseFirestore.instance;
-    final snap = await _store.collection("users").get();
-    users = snap.docs.map((e) => User.fromJson(e.data())).toList();
+    final snap = await _store.collection("characters").get();
+    characters = snap.docs.map((e) => Character.fromJson(e.data())).toList();
     setState(() {});
+  }
+
+  /// Firestore にキャラクター群を追加する
+  Future<void> addCharacters() async {
+    // 参考：http://www.sazaesan.jp/charactors.html
+    List<Character> storeCharacters = [
+      Character(name: 'フグ田サザエ', age: 24),
+      Character(name: '磯野波平', age: 54),
+      Character(name: '磯野フネ', age: 50),
+      Character(name: 'フグ田マスオ', age: 28),
+      Character(name: '磯野カツオ', age: 11),
+      Character(name: '磯野ワカメ', age: 9),
+      Character(name: 'フグ田タラオ', age: 3),
+      Character(name: 'タマ', age: null),
+    ];
+    for (final character in storeCharacters) {
+      await _store.collection('characters').add({
+        'name': character.name,
+        'age': character.age,
+      });
+    }
   }
 
   @override
@@ -59,9 +83,9 @@ class _MyHomePageState extends State<MyHomePage> {
             const Text(
               'users',
             ),
-            if (users.isNotEmpty)
+            if (characters.isNotEmpty)
               Column(
-                children: users
+                children: characters
                     .map((e) => ListTile(
                           title: Text('${e.name} : ${e.age}'),
                         ))

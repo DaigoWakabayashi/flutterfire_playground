@@ -1,14 +1,14 @@
-class User {
+class Character {
   final String? name;
   final int? age;
 
-  User({
+  Character({
     required this.name,
     required this.age,
   });
 
-  factory User.fromJson(Map<String, dynamic> data) {
-    return User(
+  factory Character.fromJson(Map<String, dynamic> data) {
+    return Character(
       name: data['name'],
       age: data['age'],
     );
