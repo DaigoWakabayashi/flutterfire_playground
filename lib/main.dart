@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutterfire_query/user.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,18 +32,18 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int count = 0;
+  List<User> users = [];
 
   @override
   void initState() {
     super.initState();
-    count += 10;
   }
 
-  void _incrementCounter() {
-    setState(() {
-      count++;
-    });
+  Future<void> fetchAllUser() async {
+    final _store = FirebaseFirestore.instance;
+    final snap = await _store.collection("users").get();
+    users = snap.docs.map((e) => User.fromJson(e.data())).toList();
+    setState(() {});
   }
 
   @override
@@ -55,17 +57,23 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
-              'You have pushed the button this many times:',
+              'users',
             ),
-            Text(
-              '$count',
-              style: Theme.of(context).textTheme.headline4,
-            ),
+            if (users.isNotEmpty)
+              Column(
+                children: users
+                    .map((e) => ListTile(
+                          title: Text('${e.name} : ${e.age}'),
+                        ))
+                    .toList(),
+              )
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: () async {
+          await fetchAllUser();
+        },
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ),
